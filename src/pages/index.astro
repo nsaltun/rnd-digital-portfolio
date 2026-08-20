@@ -1,0 +1,127 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+const projects = [
+  {
+    title: "Maison de Verre - Restorasyon",
+    location: "İstanbul, TR",
+    coordinates: "41.0082° N, 28.9784° E",
+    year: "2025",
+    image: "/images/proje1.jpg",
+    pdf: "/downloads/proje1.pdf"
+  },
+  {
+    title: "Brütalist Villa Konsepti",
+    location: "Bodrum, TR",
+    coordinates: "37.0344° N, 27.4305° E",
+    year: "2026",
+    image: "/images/proje2.jpg",
+    pdf: "/downloads/proje2.pdf"
+  }
+];
+---
+
+<Layout title="Mimar [İsim Soyisim] | Dijital Portfolyo">
+  <main class="max-w-6xl mx-auto px-6 py-24 text-[#111111] bg-[#FFFFFF]">
+    
+    <!-- 1. HERO / GİRİŞ -->
+    <header class="h-[70vh] flex flex-col justify-end mb-32 border-b border-[#111111]/10 pb-12 relative overflow-hidden">
+      <div class="absolute left-0 bottom-0 w-[1px] h-32 bg-[#111111]/20"></div>
+      <h1 class="text-6xl md:text-8xl font-light tracking-tighter leading-none mb-6">
+        MİMAR <br/> [İSİM SOYİSİM]
+      </h1>
+      <p class="text-xl md:text-2xl font-light max-w-xl text-[#111111]/70 leading-relaxed">
+        Form, işlevi takip etmez; form ve işlev mimari bir bütünlük içinde var olur.
+      </p>
+    </header>
+
+    <!-- 2. PORTFOLYO (CAD HOVER EFEKTİ) -->
+    <section class="mb-40">
+      <h2 class="text-xs uppercase tracking-widest text-[#111111]/40 mb-16 font-mono-arch">— SEÇİLMİŞ PROJELER</h2>
+      
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-x-16 gap-y-32 items-start">
+        {projects.map((project, index) => (
+          <div class={`md:col-span-6 ${index % 2 === 0 ? 'md:mt-0' : 'md:mt-32'} group/item relative`}>
+            
+            <div class="relative overflow-hidden bg-[#F5F5F7] aspect-[4/3] mb-6">
+              <!-- CAD Çizgileri -->
+              <span class="absolute top-0 left-0 w-0 h-[1px] bg-[#111111]/40 transition-all duration-500 group-hover/item:w-full z-10"></span>
+              <span class="absolute top-0 left-0 h-0 w-[1px] bg-[#111111]/40 transition-all duration-500 group-hover/item:h-full z-10"></span>
+              
+              <img 
+                src={project.image} 
+                alt={project.title} 
+                class="w-full h-full object-cover grayscale contrast-[1.15] transition-all duration-700 group-hover/item:grayscale-0 group-hover/item:scale-105"
+                loading="lazy"
+              />
+
+              <div class="absolute bottom-4 left-4 opacity-0 transition-opacity duration-500 group-hover/item:opacity-100 bg-[#FFFFFF]/90 backdrop-blur-sm px-3 py-1.5 text-[10px] tracking-widest uppercase font-mono-arch z-10 border border-[#111111]/10">
+                {project.coordinates} — {project.year}
+              </div>
+            </div>
+
+            <div class="flex justify-between items-end border-b border-[#111111]/10 pb-4">
+              <div>
+                <h3 class="text-2xl font-light tracking-tight">{project.title}</h3>
+                <p class="text-xs text-[#111111]/50 uppercase tracking-wider mt-1 font-mono-arch">{project.location}</p>
+              </div>
+              
+              <!-- Client-side PDF İndirme -->
+              <a 
+                href={project.pdf} 
+                download
+                class="text-[11px] uppercase tracking-widest border border-[#111111] px-4 py-2 hover:bg-[#111111] hover:text-white transition-colors duration-300 font-mono-arch"
+              >
+                PROJEYİ İNDİR ↓
+              </a>
+            </div>
+
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- 3. ÖZGEÇMİŞ -->
+    <section class="grid grid-cols-1 md:grid-cols-12 gap-8 mb-40 border-t border-[#111111]/10 pt-16">
+      <div class="md:col-span-4">
+        <h2 class="text-xs uppercase tracking-widest text-[#111111]/40 font-mono-arch">— ÖZGEÇMİŞ & EĞİTİM</h2>
+      </div>
+      <div class="md:col-span-8 font-light text-lg space-y-6 text-[#111111]/80">
+        <p class="leading-relaxed">İTÜ Mimarlık Bölümü'nden dereceyle mezun oldu. Sürdürülebilir malzeme kullanımı ve minimalist mekan tasarımları üzerine yoğunlaştı.</p>
+        
+        <div class="pt-6 border-t border-[#111111]/5 text-sm space-y-4 font-mono-arch">
+          <div class="flex justify-between border-b border-[#111111]/5 pb-2">
+            <span class="text-[#111111]/50">2021 — 2023</span> 
+            <span class="text-right">Yüksek Lisans — Politecnico di Milano</span>
+          </div>
+          <div class="flex justify-between border-b border-[#111111]/5 pb-2">
+            <span class="text-[#111111]/50">2017 — 2021</span> 
+            <span class="text-right">Lisans — İstanbul Teknik Üniversitesi</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. DIJITAL KARTVIZIT & ILETISIM -->
+    <footer class="border-t-2 border-[#111111] pt-12 flex flex-col md:flex-row justify-between items-start gap-12">
+      <div>
+        <h2 class="text-xs uppercase tracking-widest text-[#111111]/40 mb-6 font-mono-arch">— İLETİŞİM</h2>
+        <div class="space-y-3 text-3xl font-light tracking-tighter">
+          <p><a href="tel:+905555555555" class="hover:underline">+90 (555) 555 55 55</a></p>
+          <p><a href="mailto:info@mimar.com" class="hover:underline">info@mimar.com</a></p>
+        </div>
+      </div>
+      
+      <div class="flex flex-col sm:flex-row gap-8 items-start sm:items-center w-full md:w-auto justify-between">
+        <div class="flex gap-6 text-xs uppercase tracking-widest font-mono-arch">
+          <a href="https://linkedin.com" target="_blank" class="hover:underline">LinkedIn</a>
+          <a href="https://instagram.com" target="_blank" class="hover:underline">Instagram</a>
+        </div>
+        <div class="w-24 h-24 bg-[#F5F5F7] border border-[#111111]/10 flex items-center justify-center text-[10px] text-[#111111]/40 uppercase tracking-wider text-center p-2 font-mono-arch">
+          QR KOD ALANI
+        </div>
+      </div>
+    </footer>
+
+  </main>
+</Layout>

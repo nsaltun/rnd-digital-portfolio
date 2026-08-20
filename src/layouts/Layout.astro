@@ -40,6 +40,10 @@ const { title } = Astro.props;
 		font-family: 'Archivo', sans-serif;
 	}
 
+	main :where(h1, h2, h3, p, a, span) {
+		text-shadow: 0 0 2px rgba(255, 255, 255, 0.95), 0 0 16px rgba(255, 255, 255, 0.75);
+	}
+
 	img {
 		content-visibility: auto;
 	}

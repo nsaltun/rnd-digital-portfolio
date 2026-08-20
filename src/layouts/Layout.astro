@@ -1,4 +1,6 @@
 ---
+import MarbleBackground from '../components/MarbleBackground.astro';
+
 interface Props {
 	title: string;
 }
@@ -21,6 +23,7 @@ const { title } = Astro.props;
 		<link href="https://googleapis.com/css2?family=Archivo:wght@100;200;300;400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
 	</head>
 	<body class="bg-[#FFFFFF] text-[#111111] antialiased selection:bg-[#111111] selection:text-white">
+		<MarbleBackground />
 		<slot />
 	</body>
 </html>

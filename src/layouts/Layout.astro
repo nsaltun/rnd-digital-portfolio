@@ -16,9 +16,9 @@ const { title } = Astro.props;
 		<title>{title}</title>
 
 		<!-- GOOGLE FONTS -->
-		<link rel="preconnect" href="https://fonts.googleapis.com">
-		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-		<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@100;200;300;400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+		<link rel="preconnect" href="https://googleapis.com">
+		<link rel="preconnect" href="https://gstatic.com" crossorigin>
+		<link href="https://googleapis.com/css2?family=Archivo:wght@100;200;300;400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
 	</head>
 	<body class="bg-[#FFFFFF] text-[#111111] antialiased selection:bg-[#111111] selection:text-white">
 		<slot />
@@ -26,6 +26,9 @@ const { title } = Astro.props;
 </html>
 
 <style is:global>
+	/* Tailwind v4 Ana Entegrasyonu */
+	@import "tailwindcss";
+
 	body {
 		font-family: 'Inter', sans-serif;
 	}

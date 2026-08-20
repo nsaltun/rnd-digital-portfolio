@@ -1,0 +1,18 @@
+---
+import qrcode from "qrcode";
+import { contact } from "../data/contact";
+
+interface Props {
+  class?: string;
+}
+
+const { class: className = "" } = Astro.props;
+
+const svg = await qrcode.toString(contact.instagram, {
+  type: "svg",
+  margin: 0,
+  color: { dark: "#111111", light: "#0000" },
+});
+---
+
+<div class={className} set:html={svg} />

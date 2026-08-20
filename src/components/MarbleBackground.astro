@@ -7,10 +7,26 @@ const { class: className = "" } = Astro.props;
 ---
 
 <div class={`pointer-events-none fixed inset-0 -z-10 ${className}`} aria-hidden="true">
-  <div
-    class="absolute inset-0 bg-cover bg-center"
-    style="background-image: url('/images/travertine-marble.jpg');"
-  >
-  </div>
+  <div class="marble-bg absolute inset-0"></div>
   <div class="absolute inset-0 bg-white/75"></div>
 </div>
+
+<style>
+  .marble-bg {
+    background-image: url('/images/italian-marble-background-1920.webp');
+    background-size: cover;
+    background-position: center;
+  }
+
+  @media (min-width: 1920px) {
+    .marble-bg {
+      background-image: url('/images/italian-marble-background-2560.webp');
+    }
+  }
+
+  @media (min-width: 2560px) {
+    .marble-bg {
+      background-image: url('/images/italian-marble-background-4k.webp');
+    }
+  }
+</style>

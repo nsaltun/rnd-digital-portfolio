@@ -1,6 +1,5 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import BlueprintArt from '../components/BlueprintArt.astro';
 import QRCode from '../components/QRCode.astro';
 import { contact } from '../data/contact';
 
@@ -10,36 +9,42 @@ const projects = [
     location: "Antalya, TR",
     coordinates: "36.8969° N, 30.7133° E",
     year: "2024",
-    variant: "residence" as const,
-    seed: 0,
-    pdf: "/downloads/proje1.pdf"
-  },
-  {
-    title: "Villa Tasarımı I",
-    location: "Kaş, TR",
-    coordinates: "36.1971° N, 29.6390° E",
-    year: "2025",
-    variant: "villa" as const,
-    seed: 1,
-    pdf: "/downloads/proje2.pdf"
+    image: "/images/rezidans-1.jpg",
+    hoverImage: "/images/rezidans-1-plan.jpg",
+    pdf: "/downloads/rezidans-1.pdf"
   },
   {
     title: "Rezidans Bloğu II",
     location: "Antalya, TR",
     coordinates: "36.8841° N, 30.7056° E",
     year: "2023",
-    variant: "residence" as const,
-    seed: 2,
-    pdf: "/downloads/proje3.pdf"
+    image: "/images/rezidans-2.jpg",
+    pdf: "/downloads/rezidans-2.pdf"
   },
   {
-    title: "Villa Tasarımı II",
-    location: "Bodrum, TR",
-    coordinates: "37.0344° N, 27.4305° E",
-    year: "2026",
-    variant: "villa" as const,
-    seed: 0,
-    pdf: "/downloads/proje4.pdf"
+    title: "Havuzlu Rezidans Kompleksi",
+    location: "Antalya, TR",
+    coordinates: "36.9081° N, 30.6956° E",
+    year: "2022",
+    image: "/images/rezidans-kompleks.jpg",
+    pdf: "/downloads/rezidans-kompleks.pdf"
+  },
+  {
+    title: "Köşe Bina Tasarımı",
+    location: "Antalya, TR",
+    coordinates: "36.8850° N, 30.7061° E",
+    year: "2021",
+    image: "/images/kose-bina.jpg",
+    pdf: "/downloads/kose-bina.pdf"
+  },
+  {
+    title: "İç Mekan Tasarımı",
+    location: "Antalya, TR",
+    coordinates: "36.8969° N, 30.7133° E",
+    year: "2025",
+    image: "/images/ic-mekan-mutfak.jpg",
+    hoverImage: "/images/ic-mekan-banyo.jpg",
+    pdf: "/downloads/ic-mekan.pdf"
   }
 ];
 ---
@@ -48,7 +53,7 @@ const projects = [
   <main class="max-w-6xl mx-auto px-6 py-24 text-[#111111]">
     
     <!-- 1. HERO / GİRİŞ -->
-    <header class="h-[70vh] flex flex-col justify-end mb-32 border-b border-[#111111]/10 pb-12 relative overflow-hidden">
+    <header class="h-[52vh] flex flex-col justify-end mb-32 border-b border-[#111111]/10 pb-12 relative overflow-hidden">
       <div class="absolute left-0 bottom-0 w-[1px] h-32 bg-[#111111]/20"></div>
       <h1 class="text-6xl md:text-8xl font-light tracking-tighter leading-none mb-6">
         MİMAR <br/> RÜMAYSA NUR ALTUN
@@ -71,11 +76,21 @@ const projects = [
               <span class="absolute top-0 left-0 w-0 h-[1px] bg-[#111111]/40 transition-all duration-500 group-hover/item:w-full z-10"></span>
               <span class="absolute top-0 left-0 h-0 w-[1px] bg-[#111111]/40 transition-all duration-500 group-hover/item:h-full z-10"></span>
               
-              <BlueprintArt
-                variant={project.variant}
-                seed={project.seed}
-                class="w-full h-full transition-transform duration-700 group-hover/item:scale-105"
+              <img
+                src={project.image}
+                alt={project.title}
+                loading="lazy"
+                class="absolute inset-0 w-full h-full object-cover grayscale contrast-[1.1] transition-all duration-700 group-hover/item:grayscale-0 group-hover/item:scale-105"
               />
+
+              {project.hoverImage && (
+                <img
+                  src={project.hoverImage}
+                  alt={`${project.title} — detay`}
+                  loading="lazy"
+                  class="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-700 group-hover/item:opacity-100"
+                />
+              )}
 
               <div class="absolute bottom-4 left-4 opacity-0 transition-opacity duration-500 group-hover/item:opacity-100 bg-[#FAF9F6]/90 backdrop-blur-sm px-3 py-1.5 text-[10px] tracking-widest uppercase font-mono-arch z-10 border border-[#111111]/10">
                 {project.coordinates} — {project.year}

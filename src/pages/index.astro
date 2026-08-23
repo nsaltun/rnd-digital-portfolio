@@ -9,24 +9,31 @@ const projects = [
     location: "Antalya, TR",
     coordinates: "36.8969° N, 30.7133° E",
     year: "2024",
-    image: "/images/rezidans-1.jpg",
-    hoverImage: "/images/rezidans-1-plan.jpg",
+    images: [
+      "/images/rezidans-1.jpg",
+      "/images/rezidans-1-2.jpg",
+      "/images/rezidans-1-3.jpg",
+      "/images/rezidans-1-4.jpg",
+      "/images/rezidans-1-5.jpg",
+      "/images/rezidans-1-plan.jpg"
+    ],
+    fullImages: [
+      "/images/full/rezidans-1.jpg",
+      "/images/full/rezidans-1-2.jpg",
+      "/images/full/rezidans-1-3.jpg",
+      "/images/full/rezidans-1-4.jpg",
+      "/images/full/rezidans-1-5.jpg",
+      "/images/full/rezidans-1-plan.jpg"
+    ],
     pdf: "/downloads/rezidans-1.pdf"
-  },
-  {
-    title: "Rezidans Bloğu II",
-    location: "Antalya, TR",
-    coordinates: "36.8841° N, 30.7056° E",
-    year: "2023",
-    image: "/images/rezidans-2.jpg",
-    pdf: "/downloads/rezidans-2.pdf"
   },
   {
     title: "Havuzlu Rezidans Kompleksi",
     location: "Antalya, TR",
     coordinates: "36.9081° N, 30.6956° E",
     year: "2022",
-    image: "/images/rezidans-kompleks.jpg",
+    images: ["/images/rezidans-kompleks.jpg"],
+    fullImages: ["/images/full/rezidans-kompleks.jpg"],
     pdf: "/downloads/rezidans-kompleks.pdf"
   },
   {
@@ -34,7 +41,8 @@ const projects = [
     location: "Antalya, TR",
     coordinates: "36.8850° N, 30.7061° E",
     year: "2021",
-    image: "/images/kose-bina.jpg",
+    images: ["/images/kose-bina.jpg"],
+    fullImages: ["/images/full/kose-bina.jpg"],
     pdf: "/downloads/kose-bina.pdf"
   },
   {
@@ -42,8 +50,16 @@ const projects = [
     location: "Antalya, TR",
     coordinates: "36.8969° N, 30.7133° E",
     year: "2025",
-    image: "/images/ic-mekan-mutfak.jpg",
-    hoverImage: "/images/ic-mekan-banyo.jpg",
+    images: [
+      "/images/ic-mekan-mutfak.jpg",
+      "/images/ic-mekan-mutfak-2.jpg",
+      "/images/ic-mekan-banyo.jpg"
+    ],
+    fullImages: [
+      "/images/full/ic-mekan-mutfak.jpg",
+      "/images/full/ic-mekan-mutfak-2.jpg",
+      "/images/full/ic-mekan-banyo.jpg"
+    ],
     pdf: "/downloads/ic-mekan.pdf"
   }
 ];
@@ -70,26 +86,31 @@ const projects = [
       <div class="grid grid-cols-1 md:grid-cols-12 gap-x-16 gap-y-32 items-start">
         {projects.map((project, index) => (
           <div class={`md:col-span-6 ${index % 2 === 0 ? 'md:mt-0' : 'md:mt-32'} group/item relative`}>
-            
-            <div class="relative overflow-hidden bg-[#F5F5F7] aspect-[4/3] mb-6">
+
+            <div
+              class="project-gallery relative overflow-hidden bg-[#F5F5F7] aspect-[4/3] mb-6 cursor-zoom-in"
+              data-full-images={JSON.stringify(project.fullImages)}
+              data-title={project.title}
+            >
               <!-- CAD Çizgileri -->
               <span class="absolute top-0 left-0 w-0 h-[1px] bg-[#111111]/40 transition-all duration-500 group-hover/item:w-full z-10"></span>
               <span class="absolute top-0 left-0 h-0 w-[1px] bg-[#111111]/40 transition-all duration-500 group-hover/item:h-full z-10"></span>
-              
-              <img
-                src={project.image}
-                alt={project.title}
-                loading="lazy"
-                class="absolute inset-0 w-full h-full object-cover grayscale contrast-[1.1] transition-all duration-700 group-hover/item:grayscale-0 group-hover/item:scale-105"
-              />
 
-              {project.hoverImage && (
+              {project.images.map((src, i) => (
                 <img
-                  src={project.hoverImage}
-                  alt={`${project.title} — detay`}
+                  src={src}
+                  alt={project.title}
                   loading="lazy"
-                  class="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-700 group-hover/item:opacity-100"
+                  class={`gallery-frame absolute inset-0 w-full h-full object-cover grayscale contrast-[1.1] transition-all duration-700 group-hover/item:grayscale-0 group-hover/item:scale-105 ${i === 0 ? 'is-active' : ''}`}
                 />
+              ))}
+
+              {project.images.length > 1 && (
+                <div class="absolute bottom-4 right-4 z-10 flex gap-1.5 opacity-0 transition-opacity duration-500 group-hover/item:opacity-100">
+                  {project.images.map((_, i) => (
+                    <span class={`gallery-dot h-1.5 w-1.5 rounded-full ring-1 ring-[#FAF9F6]/80 transition-all duration-300 ${i === 0 ? 'is-active bg-[#FAF9F6] scale-125' : 'bg-[#FAF9F6]/40'}`}></span>
+                  ))}
+                </div>
               )}
 
               <div class="absolute bottom-4 left-4 opacity-0 transition-opacity duration-500 group-hover/item:opacity-100 bg-[#FAF9F6]/90 backdrop-blur-sm px-3 py-1.5 text-[10px] tracking-widest uppercase font-mono-arch z-10 border border-[#111111]/10">
@@ -172,4 +193,115 @@ const projects = [
     </footer>
 
   </main>
+
+  <!-- LIGHTBOX -->
+  <div id="lightbox" class="fixed inset-0 z-50 items-center justify-center bg-[#111111]/95 backdrop-blur-sm p-6" role="dialog" aria-modal="true">
+    <button id="lightbox-close" aria-label="Kapat" class="absolute top-6 right-6 text-[#FAF9F6] text-3xl font-light leading-none hover:opacity-60 transition-opacity">&times;</button>
+    <button id="lightbox-prev" aria-label="Önceki görsel" class="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 text-[#FAF9F6] text-4xl font-light hover:opacity-60 transition-opacity">&#8249;</button>
+    <button id="lightbox-next" aria-label="Sonraki görsel" class="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 text-[#FAF9F6] text-4xl font-light hover:opacity-60 transition-opacity">&#8250;</button>
+
+    <div class="max-w-6xl max-h-[85vh] w-full flex flex-col items-center gap-4">
+      <img id="lightbox-image" src="" alt="" class="max-h-[80vh] max-w-full object-contain" />
+      <p id="lightbox-caption" class="text-[#FAF9F6]/70 text-[11px] uppercase tracking-widest font-mono-arch"></p>
+    </div>
+  </div>
 </Layout>
+
+<script>
+  const HOVER_INTERVAL = 4000;
+
+  document.querySelectorAll<HTMLElement>('.project-gallery').forEach((gallery) => {
+    const frames = Array.from(gallery.querySelectorAll<HTMLElement>('.gallery-frame'));
+    const dots = Array.from(gallery.querySelectorAll<HTMLElement>('.gallery-dot'));
+    if (frames.length <= 1) return;
+
+    let active = 0;
+    let timer: number | undefined;
+
+    const setActive = (next: number) => {
+      frames[active].classList.remove('is-active');
+      dots[active]?.classList.remove('is-active', 'bg-[#FAF9F6]', 'scale-125');
+      dots[active]?.classList.add('bg-[#FAF9F6]/40');
+
+      active = next;
+      frames[active].classList.add('is-active');
+      dots[active]?.classList.add('is-active', 'bg-[#FAF9F6]', 'scale-125');
+      dots[active]?.classList.remove('bg-[#FAF9F6]/40');
+    };
+
+    gallery.addEventListener('mouseenter', () => {
+      timer = window.setInterval(() => setActive((active + 1) % frames.length), HOVER_INTERVAL);
+    });
+
+    gallery.addEventListener('mouseleave', () => {
+      if (timer) window.clearInterval(timer);
+      setActive(0);
+    });
+  });
+
+  const lightbox = document.getElementById('lightbox') as HTMLElement;
+  const lightboxImage = document.getElementById('lightbox-image') as HTMLImageElement;
+  const lightboxCaption = document.getElementById('lightbox-caption') as HTMLElement;
+  const prevBtn = document.getElementById('lightbox-prev') as HTMLButtonElement;
+  const nextBtn = document.getElementById('lightbox-next') as HTMLButtonElement;
+  const closeBtn = document.getElementById('lightbox-close') as HTMLButtonElement;
+
+  let currentImages: string[] = [];
+  let currentIndex = 0;
+  let currentTitle = '';
+
+  const showImage = () => {
+    lightboxImage.src = currentImages[currentIndex];
+    lightboxImage.alt = currentTitle;
+    lightboxCaption.textContent =
+      currentImages.length > 1 ? `${currentTitle} — ${currentIndex + 1}/${currentImages.length}` : currentTitle;
+    const showNav = currentImages.length > 1;
+    prevBtn.style.display = showNav ? '' : 'none';
+    nextBtn.style.display = showNav ? '' : 'none';
+  };
+
+  const openLightbox = (images: string[], title: string, startIndex: number) => {
+    currentImages = images;
+    currentTitle = title;
+    currentIndex = startIndex;
+    showImage();
+    lightbox.classList.add('is-open');
+    document.body.style.overflow = 'hidden';
+  };
+
+  const closeLightbox = () => {
+    lightbox.classList.remove('is-open');
+    document.body.style.overflow = '';
+  };
+
+  document.querySelectorAll<HTMLElement>('.project-gallery').forEach((gallery) => {
+    gallery.addEventListener('click', () => {
+      const images: string[] = JSON.parse(gallery.dataset.fullImages || '[]');
+      const title = gallery.dataset.title || '';
+      const frames = Array.from(gallery.querySelectorAll('.gallery-frame'));
+      const activeFrame = gallery.querySelector('.gallery-frame.is-active');
+      const startIndex = activeFrame ? frames.indexOf(activeFrame) : 0;
+      openLightbox(images, title, startIndex);
+    });
+  });
+
+  closeBtn.addEventListener('click', closeLightbox);
+  lightbox.addEventListener('click', (e) => {
+    if (e.target === lightbox) closeLightbox();
+  });
+  prevBtn.addEventListener('click', () => {
+    currentIndex = (currentIndex - 1 + currentImages.length) % currentImages.length;
+    showImage();
+  });
+  nextBtn.addEventListener('click', () => {
+    currentIndex = (currentIndex + 1) % currentImages.length;
+    showImage();
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (!lightbox.classList.contains('is-open')) return;
+    if (e.key === 'Escape') closeLightbox();
+    if (e.key === 'ArrowLeft') prevBtn.click();
+    if (e.key === 'ArrowRight') nextBtn.click();
+  });
+</script>

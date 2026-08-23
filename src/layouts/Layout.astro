@@ -40,4 +40,20 @@ const { title } = Astro.props;
 	img {
 		content-visibility: auto;
 	}
+
+	.gallery-frame {
+		opacity: 0;
+	}
+
+	.gallery-frame.is-active {
+		opacity: 1;
+	}
+
+	#lightbox {
+		display: none;
+	}
+
+	#lightbox.is-open {
+		display: flex;
+	}
 </style>

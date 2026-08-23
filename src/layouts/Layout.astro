@@ -56,4 +56,24 @@ const { title } = Astro.props;
 	#lightbox.is-open {
 		display: flex;
 	}
+
+	.lb-loader {
+		position: absolute;
+		width: 28px;
+		height: 28px;
+		border: 1px solid rgba(250, 249, 246, 0.2);
+		border-top-color: #FAF9F6;
+		border-radius: 9999px;
+		animation: lb-spin 0.9s linear infinite;
+	}
+
+	.lb-loader.hidden {
+		display: none;
+	}
+
+	@keyframes lb-spin {
+		to {
+			transform: rotate(360deg);
+		}
+	}
 </style>

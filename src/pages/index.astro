@@ -69,14 +69,17 @@ const projects = [
   <main class="max-w-6xl mx-auto px-6 py-24 text-[#111111]">
     
     <!-- 1. HERO / GİRİŞ -->
-    <header class="h-[52vh] flex flex-col justify-end mb-32 border-b border-[#111111]/10 pb-12 relative overflow-hidden">
-      <div class="absolute left-0 bottom-0 w-[1px] h-32 bg-[#111111]/20"></div>
+    <header class="h-[52vh] flex flex-col justify-end mb-32 border-b border-[#111111]/10 pb-12 relative">
       <h1 class="text-6xl md:text-8xl font-light tracking-tighter leading-none mb-6">
         MİMAR <br/> RÜMAYSA NUR ALTUN
       </h1>
       <p class="text-xl md:text-2xl font-light max-w-xl text-[#111111]/70 leading-relaxed">
         Form, işlevi takip etmez; form ve işlev mimari bir bütünlük içinde var olur.
       </p>
+      <!-- Teknik çizim referans işareti: yatay ayraçla kesişen dikey işaret, ucunda nirengi noktası -->
+      <div class="absolute left-0 -bottom-2.5 h-10 w-[1px] bg-[#111111]/40">
+        <span class="absolute -top-1 left-1/2 -translate-x-1/2 h-1.5 w-1.5 rounded-full border border-[#111111]/40"></span>
+      </div>
     </header>
 
     <!-- 2. PORTFOLYO (CAD HOVER EFEKTİ) -->
@@ -200,8 +203,12 @@ const projects = [
     <button id="lightbox-prev" aria-label="Önceki görsel" class="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 text-[#FAF9F6] text-4xl font-light hover:opacity-60 transition-opacity">&#8249;</button>
     <button id="lightbox-next" aria-label="Sonraki görsel" class="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 text-[#FAF9F6] text-4xl font-light hover:opacity-60 transition-opacity">&#8250;</button>
 
-    <div class="max-w-6xl max-h-[85vh] w-full flex flex-col items-center gap-4">
-      <img id="lightbox-image" src="" alt="" class="max-h-[80vh] max-w-full object-contain" />
+    <div class="max-w-6xl w-full flex flex-col items-center gap-4 touch-pan-y">
+      <div id="lightbox-stage" class="relative flex items-center justify-center w-full h-[74vh] overflow-hidden">
+        <span id="lightbox-loader" class="lb-loader hidden"></span>
+        <img id="lightbox-image" src="" alt="" class="absolute inset-0 w-full h-full object-contain select-none opacity-0" />
+        <img id="lightbox-image-2" src="" alt="" class="absolute inset-0 w-full h-full object-contain select-none opacity-0" />
+      </div>
       <p id="lightbox-caption" class="text-[#FAF9F6]/70 text-[11px] uppercase tracking-widest font-mono-arch"></p>
     </div>
   </div>
@@ -241,18 +248,66 @@ const projects = [
 
   const lightbox = document.getElementById('lightbox') as HTMLElement;
   const lightboxImage = document.getElementById('lightbox-image') as HTMLImageElement;
+  const lightboxImage2 = document.getElementById('lightbox-image-2') as HTMLImageElement;
   const lightboxCaption = document.getElementById('lightbox-caption') as HTMLElement;
+  const lightboxLoader = document.getElementById('lightbox-loader') as HTMLElement;
   const prevBtn = document.getElementById('lightbox-prev') as HTMLButtonElement;
   const nextBtn = document.getElementById('lightbox-next') as HTMLButtonElement;
   const closeBtn = document.getElementById('lightbox-close') as HTMLButtonElement;
 
+  // Arka planda tüm galeri görsellerini önden yükle — lightbox'ta anında geçiş için.
+  const preloaded = new Set<string>();
+  const preloadImage = (src: string) =>
+    new Promise<void>((resolve) => {
+      if (preloaded.has(src)) return resolve();
+      const img = new Image();
+      img.onload = img.onerror = () => {
+        preloaded.add(src);
+        resolve();
+      };
+      img.src = src;
+    });
+
+  const allFullImages = Array.from(document.querySelectorAll<HTMLElement>('.project-gallery')).flatMap(
+    (g) => JSON.parse(g.dataset.fullImages || '[]') as string[]
+  );
+
+  const preloadQueue = async (urls: string[], concurrency = 2) => {
+    let i = 0;
+    const workers = Array.from({ length: concurrency }, async () => {
+      while (i < urls.length) {
+        const url = urls[i++];
+        await preloadImage(url);
+      }
+    });
+    await Promise.all(workers);
+  };
+
+  const startBackgroundPreload = () => {
+    const idle = (cb: () => void) =>
+      'requestIdleCallback' in window ? (window as any).requestIdleCallback(cb) : setTimeout(cb, 1200);
+    idle(() => preloadQueue(allFullImages));
+  };
+
+  if (document.readyState === 'complete') startBackgroundPreload();
+  else window.addEventListener('load', startBackgroundPreload);
+
   let currentImages: string[] = [];
   let currentIndex = 0;
   let currentTitle = '';
+  let isAnimating = false;
 
-  const showImage = () => {
-    lightboxImage.src = currentImages[currentIndex];
-    lightboxImage.alt = currentTitle;
+  // frontImg = şu an görünen, backImg = bir sonraki geçişte içeri girecek olan.
+  let frontImg = lightboxImage;
+  let backImg = lightboxImage2;
+
+  const SLIDE_MS = 320;
+  const SLIDE_EASE = 'cubic-bezier(0.22, 1, 0.36, 1)';
+  const BOUNCE_DIST = 26;
+
+  const forceReflow = (el: HTMLElement) => void el.offsetWidth;
+
+  const updateNavUI = () => {
     lightboxCaption.textContent =
       currentImages.length > 1 ? `${currentTitle} — ${currentIndex + 1}/${currentImages.length}` : currentTitle;
     const showNav = currentImages.length > 1;
@@ -260,18 +315,119 @@ const projects = [
     nextBtn.style.display = showNav ? '' : 'none';
   };
 
+  // İlk açılış: tek görsel, yerinde belirir.
+  const openImage = (src: string) => {
+    const reveal = () => {
+      preloaded.add(src);
+      lightboxLoader.classList.add('hidden');
+      frontImg.style.transition = 'opacity 280ms ease';
+      forceReflow(frontImg);
+      frontImg.classList.remove('opacity-0');
+    };
+    frontImg.style.transition = 'none';
+    frontImg.style.transform = 'translateX(0)';
+    frontImg.classList.add('opacity-0');
+    frontImg.src = src;
+    if (preloaded.has(src)) requestAnimationFrame(reveal);
+    else {
+      lightboxLoader.classList.remove('hidden');
+      frontImg.onload = reveal;
+    }
+  };
+
+  // direction: 1 = sonraki, -1 = önceki — iki görsel aynı anda, birbirinin yerini alarak kayar.
+  const slideTo = (src: string, direction: number) => {
+    const run = () => {
+      preloaded.add(src);
+      lightboxLoader.classList.add('hidden');
+      isAnimating = true;
+
+      backImg.style.transition = 'none';
+      backImg.style.transform = `translateX(${direction > 0 ? '100%' : '-100%'})`;
+      backImg.classList.remove('opacity-0');
+      forceReflow(backImg);
+
+      requestAnimationFrame(() => {
+        const anim = `transform ${SLIDE_MS}ms ${SLIDE_EASE}`;
+        frontImg.style.transition = anim;
+        backImg.style.transition = anim;
+        frontImg.style.transform = `translateX(${direction > 0 ? '-100%' : '100%'})`;
+        backImg.style.transform = 'translateX(0)';
+      });
+
+      window.setTimeout(() => {
+        frontImg.classList.add('opacity-0');
+        [frontImg, backImg] = [backImg, frontImg];
+        isAnimating = false;
+      }, SLIDE_MS + 20);
+    };
+
+    backImg.src = src;
+    if (preloaded.has(src)) {
+      run();
+    } else {
+      lightboxLoader.classList.remove('hidden');
+      backImg.onload = run;
+    }
+  };
+
+  // Tek görselli galerilerde kaydırma denemesine hafif bir "esneme" tepkisi.
+  const bounceImage = (direction: number) => {
+    const el = frontImg;
+    const offset = direction > 0 ? -BOUNCE_DIST : BOUNCE_DIST;
+    el.style.transition = 'transform 140ms ease-out';
+    el.style.transform = `translateX(${offset}px)`;
+    window.setTimeout(() => {
+      el.style.transition = 'transform 260ms cubic-bezier(0.34, 1.56, 0.64, 1)';
+      el.style.transform = 'translateX(0)';
+    }, 140);
+  };
+
+  const showImage = (isFirstOpen = false, direction = 0) => {
+    updateNavUI();
+    const src = currentImages[currentIndex];
+    if (isFirstOpen) openImage(src);
+    else slideTo(src, direction);
+  };
+
+  // iOS Safari'de sade `overflow:hidden` arka plan scroll'unu tam engellemiyor.
+  let lockedScrollY = 0;
+  const lockScroll = () => {
+    lockedScrollY = window.scrollY;
+    document.body.style.position = 'fixed';
+    document.body.style.top = `-${lockedScrollY}px`;
+    document.body.style.width = '100%';
+  };
+  const unlockScroll = () => {
+    document.body.style.position = '';
+    document.body.style.top = '';
+    document.body.style.width = '';
+    window.scrollTo(0, lockedScrollY);
+  };
+
   const openLightbox = (images: string[], title: string, startIndex: number) => {
     currentImages = images;
     currentTitle = title;
     currentIndex = startIndex;
-    showImage();
+    showImage(true);
     lightbox.classList.add('is-open');
-    document.body.style.overflow = 'hidden';
+    lockScroll();
   };
 
   const closeLightbox = () => {
     lightbox.classList.remove('is-open');
-    document.body.style.overflow = '';
+    unlockScroll();
+  };
+
+  const goPrev = () => {
+    if (isAnimating || currentImages.length <= 1) return;
+    currentIndex = (currentIndex - 1 + currentImages.length) % currentImages.length;
+    showImage(false, -1);
+  };
+  const goNext = () => {
+    if (isAnimating || currentImages.length <= 1) return;
+    currentIndex = (currentIndex + 1) % currentImages.length;
+    showImage(false, 1);
   };
 
   document.querySelectorAll<HTMLElement>('.project-gallery').forEach((gallery) => {
@@ -289,19 +445,43 @@ const projects = [
   lightbox.addEventListener('click', (e) => {
     if (e.target === lightbox) closeLightbox();
   });
-  prevBtn.addEventListener('click', () => {
-    currentIndex = (currentIndex - 1 + currentImages.length) % currentImages.length;
-    showImage();
-  });
-  nextBtn.addEventListener('click', () => {
-    currentIndex = (currentIndex + 1) % currentImages.length;
-    showImage();
-  });
+  prevBtn.addEventListener('click', goPrev);
+  nextBtn.addEventListener('click', goNext);
 
   document.addEventListener('keydown', (e) => {
     if (!lightbox.classList.contains('is-open')) return;
     if (e.key === 'Escape') closeLightbox();
-    if (e.key === 'ArrowLeft') prevBtn.click();
-    if (e.key === 'ArrowRight') nextBtn.click();
+    if (e.key === 'ArrowLeft') goPrev();
+    if (e.key === 'ArrowRight') goNext();
   });
+
+  // Dokunmatikte kaydırarak geçiş — pinch-zoom'a müdahale etmemek için sadece
+  // yatay hareketi ölçüyoruz, preventDefault çağırmıyoruz.
+  let touchStartX = 0;
+  let touchStartY = 0;
+  lightbox.addEventListener(
+    'touchstart',
+    (e) => {
+      touchStartX = e.changedTouches[0].clientX;
+      touchStartY = e.changedTouches[0].clientY;
+    },
+    { passive: true }
+  );
+  lightbox.addEventListener(
+    'touchend',
+    (e) => {
+      if (isAnimating) return;
+      const dx = e.changedTouches[0].clientX - touchStartX;
+      const dy = e.changedTouches[0].clientY - touchStartY;
+      if (Math.abs(dx) < 48 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+      const direction = dx < 0 ? 1 : -1;
+      if (currentImages.length <= 1) {
+        bounceImage(direction);
+        return;
+      }
+      if (direction > 0) goNext();
+      else goPrev();
+    },
+    { passive: true }
+  );
 </script>

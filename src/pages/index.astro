@@ -1,7 +1,19 @@
 ---
+import fs from 'node:fs';
+import path from 'node:path';
 import Layout from '../layouts/Layout.astro';
 import QRCode from '../components/QRCode.astro';
 import { contact } from '../data/contact';
+
+// Bir proje dosyası henüz eklenmediyse (boş/placeholder PDF), indirme butonunu gizle.
+const hasRealFile = (publicPath: string) => {
+  try {
+    const fullPath = path.join(process.cwd(), 'public', publicPath);
+    return fs.statSync(fullPath).size > 0;
+  } catch {
+    return false;
+  }
+};
 
 const projects = [
   {
@@ -62,7 +74,7 @@ const projects = [
     ],
     pdf: "/downloads/ic-mekan.pdf"
   }
-];
+].map((project) => ({ ...project, hasPdf: hasRealFile(project.pdf) }));
 ---
 
 <Layout title={`${contact.title} ${contact.fullName} | Dijital Portfolyo`}>
@@ -102,7 +114,7 @@ const projects = [
               {project.images.map((src, i) => (
                 <img
                   src={src}
-                  alt={project.title}
+                  alt={`${project.title} — ${project.location}, mimari tasarım görseli ${i + 1}/${project.images.length}`}
                   loading="lazy"
                   class={`gallery-frame absolute inset-0 w-full h-full object-cover grayscale contrast-[1.1] transition-all duration-700 group-hover/item:grayscale-0 group-hover/item:scale-105 ${i === 0 ? 'is-active' : ''}`}
                 />
@@ -127,14 +139,16 @@ const projects = [
                 <p class="text-xs text-[#111111]/50 uppercase tracking-wider mt-1 font-mono-arch">{project.location}</p>
               </div>
               
-              <!-- Client-side PDF İndirme -->
-              <a 
-                href={project.pdf} 
-                download
-                class="text-[11px] uppercase tracking-widest border border-[#111111] px-4 py-2 hover:bg-[#111111] hover:text-white transition-colors duration-300 font-mono-arch"
-              >
-                PROJEYİ İNDİR ↓
-              </a>
+              <!-- Client-side PDF İndirme: dosya eklenene kadar buton görünmez -->
+              {project.hasPdf && (
+                <a
+                  href={project.pdf}
+                  download
+                  class="text-[11px] uppercase tracking-widest border border-[#111111] px-4 py-2 hover:bg-[#111111] hover:text-white transition-colors duration-300 font-mono-arch"
+                >
+                  PROJEYİ İNDİR ↓
+                </a>
+              )}
             </div>
 
           </div>
@@ -199,11 +213,23 @@ const projects = [
 
   <!-- LIGHTBOX -->
   <div id="lightbox" class="fixed inset-0 z-50 items-center justify-center bg-[#111111]/95 backdrop-blur-sm p-6" role="dialog" aria-modal="true">
-    <button id="lightbox-close" aria-label="Kapat" class="absolute top-6 right-6 text-[#FAF9F6] text-3xl font-light leading-none hover:opacity-60 transition-opacity">&times;</button>
-    <button id="lightbox-prev" aria-label="Önceki görsel" class="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 text-[#FAF9F6] text-4xl font-light hover:opacity-60 transition-opacity">&#8249;</button>
-    <button id="lightbox-next" aria-label="Sonraki görsel" class="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 text-[#FAF9F6] text-4xl font-light hover:opacity-60 transition-opacity">&#8250;</button>
+    <button id="lightbox-close" aria-label="Kapat" class="absolute top-6 right-6 z-20 text-[#FAF9F6] text-3xl font-light leading-none hover:opacity-60 transition-opacity">&times;</button>
+    <button
+      id="lightbox-prev"
+      aria-label="Önceki görsel"
+      class="absolute inset-y-0 left-0 z-10 flex items-center justify-center w-[max(4.5rem,calc(50%-36rem))] text-[#FAF9F6] text-6xl md:text-7xl font-light hover:bg-white/5 active:opacity-60 transition-colors"
+    >
+      &#8249;
+    </button>
+    <button
+      id="lightbox-next"
+      aria-label="Sonraki görsel"
+      class="absolute inset-y-0 right-0 z-10 flex items-center justify-center w-[max(4.5rem,calc(50%-36rem))] text-[#FAF9F6] text-6xl md:text-7xl font-light hover:bg-white/5 active:opacity-60 transition-colors"
+    >
+      &#8250;
+    </button>
 
-    <div class="max-w-6xl w-full flex flex-col items-center gap-4 touch-pan-y">
+    <div class="max-w-6xl w-full flex flex-col items-center gap-4">
       <div id="lightbox-stage" class="relative flex items-center justify-center w-full h-[74vh] overflow-hidden">
         <span id="lightbox-loader" class="lb-loader hidden"></span>
         <img id="lightbox-image" src="" alt="" class="absolute inset-0 w-full h-full object-contain select-none opacity-0" />
@@ -405,6 +431,9 @@ const projects = [
     window.scrollTo(0, lockedScrollY);
   };
 
+  // Telefonun "geri" tuşu, lightbox'ı kapatsın; siteden çıkmasın.
+  let lightboxHistoryPushed = false;
+
   const openLightbox = (images: string[], title: string, startIndex: number) => {
     currentImages = images;
     currentTitle = title;
@@ -412,12 +441,21 @@ const projects = [
     showImage(true);
     lightbox.classList.add('is-open');
     lockScroll();
+    history.pushState({ lightbox: true }, '', location.href);
+    lightboxHistoryPushed = true;
   };
 
-  const closeLightbox = () => {
+  const closeLightbox = (fromPopstate = false) => {
+    if (!lightbox.classList.contains('is-open')) return;
     lightbox.classList.remove('is-open');
     unlockScroll();
+    if (lightboxHistoryPushed) {
+      lightboxHistoryPushed = false;
+      if (!fromPopstate) history.back();
+    }
   };
+
+  window.addEventListener('popstate', () => closeLightbox(true));
 
   const goPrev = () => {
     if (isAnimating || currentImages.length <= 1) return;
@@ -441,7 +479,7 @@ const projects = [
     });
   });
 
-  closeBtn.addEventListener('click', closeLightbox);
+  closeBtn.addEventListener('click', () => closeLightbox());
   lightbox.addEventListener('click', (e) => {
     if (e.target === lightbox) closeLightbox();
   });
@@ -470,9 +508,21 @@ const projects = [
   lightbox.addEventListener(
     'touchend',
     (e) => {
-      if (isAnimating) return;
       const dx = e.changedTouches[0].clientX - touchStartX;
       const dy = e.changedTouches[0].clientY - touchStartY;
+
+      // Basit bir dokunuş (kaydırma değil) — kapatma tuşuna veya arka plana
+      // dokunulduysa, tarayıcının click sentezini beklemeden hemen kapat.
+      if (Math.abs(dx) < 10 && Math.abs(dy) < 10) {
+        const target = e.target as HTMLElement;
+        if (target === closeBtn || target.closest('#lightbox-close') || target === lightbox) {
+          e.preventDefault();
+          closeLightbox();
+        }
+        return;
+      }
+
+      if (isAnimating) return;
       if (Math.abs(dx) < 48 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
       const direction = dx < 0 ? 1 : -1;
       if (currentImages.length <= 1) {
@@ -482,6 +532,6 @@ const projects = [
       if (direction > 0) goNext();
       else goPrev();
     },
-    { passive: true }
+    { passive: false }
   );
 </script>

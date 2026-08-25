@@ -80,20 +80,41 @@ const projects = [
 <Layout title={`${contact.title} ${contact.fullName} | Dijital Portfolyo`}>
   <main class="max-w-6xl mx-auto px-6 py-24 text-[#111111]">
     
-    <!-- 1. HERO / GİRİŞ -->
-    <header class="min-h-[42vh] flex flex-col justify-end mb-32 border-b border-[#111111]/10 pb-12 relative">
+    <!-- 1. HERO / GİRİŞ — Mobil: ekranı ikiye bölen, kaydırdıkça solan banner -->
+    <div class="md:hidden">
+      <div id="mobile-banner" class="h-[50vh] flex items-center justify-center">
+        <div class="flex items-end gap-3" style="filter: drop-shadow(-5px 8px 5px rgba(17,17,17,0.25));" aria-hidden="true">
+          <span class="font-mono-arch leading-none text-[#111111] text-[46vw]" style="opacity: 0.9;">R</span>
+          <span class="mark-dot bg-[#111111] w-[7vw] h-[7vw] mb-[7vw]" style="opacity: 0.55;"></span>
+        </div>
+      </div>
+      <div class="min-h-[50vh] flex flex-col justify-center pb-16 mb-32 border-b border-[#111111]/10 relative">
+        <h1 class="text-6xl font-light tracking-tighter leading-none mb-6">
+          MİMAR <br/> RÜMAYSA NUR ALTUN
+        </h1>
+        <p class="text-xl font-light max-w-xl text-[#111111]/70 leading-relaxed">
+          Form, işlevi takip etmez; form ve işlev mimari bir bütünlük içinde var olur.
+        </p>
+        <div class="absolute left-0 -bottom-2.5 h-10 w-[1px] bg-[#111111]/40">
+          <span class="absolute -top-1 left-1/2 -translate-x-1/2 h-1.5 w-1.5 rounded-full border border-[#111111]/40"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 1. HERO / GİRİŞ — Masaüstü -->
+    <header class="hidden md:flex min-h-[42vh] flex-col justify-end mb-32 border-b border-[#111111]/10 pb-12 relative">
       <div
-        class="flex items-end self-center gap-1.5 md:gap-2.5 mb-5 md:mb-8"
-        style="filter: drop-shadow(-3px 5px 3px rgba(17,17,17,0.25));"
+        class="flex items-end self-start gap-5 mb-8"
+        style="filter: drop-shadow(-6px 10px 6px rgba(17,17,17,0.25));"
         aria-hidden="true"
       >
-        <span class="font-mono-arch leading-none text-[#111111] text-[68px] md:text-[108px]" style="opacity: 0.9;">R</span>
-        <span class="bg-[#111111] w-[11px] h-[11px] md:w-[17px] md:h-[17px] mb-[11px] md:mb-[17px]" style="opacity: 0.55;"></span>
+        <span class="font-mono-arch leading-none text-[#111111] text-[216px]" style="opacity: 0.9;">R</span>
+        <span class="mark-dot bg-[#111111] w-[34px] h-[34px] mb-[34px]" style="opacity: 0.55;"></span>
       </div>
-      <h1 class="text-6xl md:text-8xl font-light tracking-tighter leading-none mb-6">
+      <h1 class="text-8xl font-light tracking-tighter leading-none mb-6">
         MİMAR <br/> RÜMAYSA NUR ALTUN
       </h1>
-      <p class="text-xl md:text-2xl font-light max-w-xl text-[#111111]/70 leading-relaxed">
+      <p class="text-2xl font-light max-w-xl text-[#111111]/70 leading-relaxed">
         Form, işlevi takip etmez; form ve işlev mimari bir bütünlük içinde var olur.
       </p>
       <!-- Teknik çizim referans işareti: yatay ayraçla kesişen dikey işaret, ucunda nirengi noktası -->
@@ -249,6 +270,18 @@ const projects = [
 </Layout>
 
 <script>
+  // Mobil: giriş banner'ı aşağı kaydırıldıkça soluklaşarak kaybolur.
+  const mobileBanner = document.getElementById('mobile-banner');
+  if (mobileBanner) {
+    const updateBannerFade = () => {
+      const fadeDistance = window.innerHeight * 0.5;
+      const progress = Math.min(Math.max(window.scrollY / fadeDistance, 0), 1);
+      mobileBanner.style.opacity = String(1 - progress);
+    };
+    window.addEventListener('scroll', updateBannerFade, { passive: true });
+    updateBannerFade();
+  }
+
   const HOVER_INTERVAL = 4000;
 
   document.querySelectorAll<HTMLElement>('.project-gallery').forEach((gallery) => {

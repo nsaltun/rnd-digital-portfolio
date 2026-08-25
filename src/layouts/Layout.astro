@@ -123,4 +123,24 @@ const personSchema = {
 		}
 	}
 
+	.mark-dot {
+		animation: mark-breathe 5.5s ease-in-out infinite;
+	}
+
+	@keyframes mark-breathe {
+		0%, 100% {
+			opacity: 0.75;
+		}
+		50% {
+			opacity: 0.3;
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.mark-dot {
+			animation: none;
+			opacity: 0.55;
+		}
+	}
+
 </style>

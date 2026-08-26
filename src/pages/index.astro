@@ -82,7 +82,7 @@ const projects = [
     
     <!-- 1. HERO / GİRİŞ — Mobil: ekranı ikiye bölen, kaydırdıkça solan banner -->
     <div class="md:hidden">
-      <div id="mobile-banner" class="h-[50vh] flex items-center justify-center">
+      <div id="mobile-banner" class="h-[50vh] flex items-center justify-center" style="will-change: opacity;">
         <div class="flex items-end gap-3" style="filter: drop-shadow(-5px 8px 5px rgba(17,17,17,0.25));" aria-hidden="true">
           <span class="font-mono-arch leading-none text-[#111111] text-[46vw]" style="opacity: 0.9;">R</span>
           <span class="mark-dot bg-[#111111] w-[7vw] h-[7vw] mb-[7vw]" style="opacity: 0.55;"></span>
@@ -90,7 +90,7 @@ const projects = [
       </div>
       <div class="min-h-[50vh] flex flex-col justify-center pb-16 mb-32 border-b border-[#111111]/10 relative">
         <h1 class="text-6xl font-light tracking-tighter leading-none mb-6">
-          MİMAR <br/> RÜMAYSA NUR ALTUN
+          MİMAR <br/> RÜMEYSA NUR ALTUN
         </h1>
         <p class="text-xl font-light max-w-xl text-[#111111]/70 leading-relaxed">
           Form, işlevi takip etmez; form ve işlev mimari bir bütünlük içinde var olur.
@@ -112,7 +112,7 @@ const projects = [
         <span class="mark-dot bg-[#111111] w-[34px] h-[34px] mb-[34px]" style="opacity: 0.55;"></span>
       </div>
       <h1 class="text-8xl font-light tracking-tighter leading-none mb-6">
-        MİMAR <br/> RÜMAYSA NUR ALTUN
+        MİMAR <br/> RÜMEYSA NUR ALTUN
       </h1>
       <p class="text-2xl font-light max-w-xl text-[#111111]/70 leading-relaxed">
         Form, işlevi takip etmez; form ve işlev mimari bir bütünlük içinde var olur.
@@ -191,7 +191,7 @@ const projects = [
         <h2 class="text-xs uppercase tracking-widest text-[#111111]/40 font-mono-arch">— ÖZGEÇMİŞ & EĞİTİM</h2>
       </div>
       <div class="md:col-span-8 font-light text-lg space-y-6 text-[#111111]/80">
-        <p class="leading-relaxed">Antalya Bilim Üniversitesi Mimarlık ve Antalya Bilişim Üniversitesi İnşaat Mühendisliği bölümlerinden çift anadal derecesiyle mezun oldu. Yapısal bütünlük ile mekânsal deneyimi aynı disiplin içinde ele alan, malzeme ve strüktürün mimari forma dönüştüğü projeler üretiyor.</p>
+        <p class="leading-relaxed">Antalya merkezli çalışmalarını sürdüren Mimar Rümeysa Nur Altun, Antalya Bilim Üniversitesi Mimarlık ve Antalya Bilişim Üniversitesi İnşaat Mühendisliği bölümlerinden çift anadal derecesiyle mezun oldu. Yapısal bütünlük ile mekânsal deneyimi aynı disiplin içinde ele alan, malzeme ve strüktürün mimari forma dönüştüğü projeler üretiyor.</p>
 
         <div class="pt-6 border-t border-[#111111]/5 text-sm space-y-4 font-mono-arch">
           <div class="flex justify-between border-b border-[#111111]/5 pb-2">
@@ -211,7 +211,7 @@ const projects = [
       <div>
         <h2 class="text-xs uppercase tracking-widest text-[#111111]/40 mb-6 font-mono-arch">— İLETİŞİM</h2>
         <div class="space-y-3 text-3xl font-light tracking-tighter">
-          <p><a href={`mailto:${contact.email}`} class="hover:underline">{contact.email}</a></p>
+          <p><a href={`mailto:${contact.email}`} class="hover:underline break-all">{contact.email}</a></p>
         </div>
         <a
           href="/contact.vcf"
@@ -242,7 +242,13 @@ const projects = [
 
   <!-- LIGHTBOX -->
   <div id="lightbox" class="fixed inset-0 z-50 items-center justify-center bg-[#111111]/95 backdrop-blur-sm p-6" role="dialog" aria-modal="true">
-    <button id="lightbox-close" aria-label="Kapat" class="absolute top-6 right-6 z-20 text-[#FAF9F6] text-3xl font-light leading-none hover:opacity-60 transition-opacity">&times;</button>
+    <button
+      id="lightbox-close"
+      aria-label="Kapat"
+      class="absolute top-2 right-2 z-20 flex items-center justify-center w-16 h-16 text-[#FAF9F6] text-5xl font-light leading-none hover:opacity-60 transition-opacity"
+    >
+      &times;
+    </button>
     <button
       id="lightbox-prev"
       aria-label="Önceki görsel"
@@ -271,14 +277,26 @@ const projects = [
 
 <script>
   // Mobil: giriş banner'ı aşağı kaydırıldıkça soluklaşarak kaybolur.
+  // requestAnimationFrame ile sınırlanıyor — yoksa hızlı kaydırmada/iOS'un
+  // "rubber-band" geri sekmesinde saniyede onlarca stil güncellemesi titremeye yol açıyor.
   const mobileBanner = document.getElementById('mobile-banner');
   if (mobileBanner) {
+    const fadeDistance = window.innerHeight * 0.28;
+    let ticking = false;
     const updateBannerFade = () => {
-      const fadeDistance = window.innerHeight * 0.5;
       const progress = Math.min(Math.max(window.scrollY / fadeDistance, 0), 1);
       mobileBanner.style.opacity = String(1 - progress);
+      ticking = false;
     };
-    window.addEventListener('scroll', updateBannerFade, { passive: true });
+    window.addEventListener(
+      'scroll',
+      () => {
+        if (ticking) return;
+        ticking = true;
+        requestAnimationFrame(updateBannerFade);
+      },
+      { passive: true }
+    );
     updateBannerFade();
   }
 

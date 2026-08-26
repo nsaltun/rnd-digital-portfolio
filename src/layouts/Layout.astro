@@ -8,7 +8,7 @@ interface Props {
 
 const {
 	title,
-	description = 'Mimar Rümaysa Nur Altun — Antalya merkezli mimari tasarım portfolyosu. Rezidans, iç mekan ve karma kullanım projeleri.',
+	description = "Antalya'da mimarlık hizmeti veren Mimar Rümeysa Nur Altun'un dijital portfolyosu. Rezidans, iç mekan ve karma kullanım projeleri.",
 } = Astro.props;
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
@@ -18,6 +18,7 @@ const personSchema = {
 	'@context': 'https://schema.org',
 	'@type': 'Person',
 	name: contact.fullName,
+	alternateName: ['Rümeysa Nur Altun', 'Rümeysa Altun','Rümaysa Nur Altun', 'Rümeysa Nur Deveci', 'Rümaysa Nur Deveci', 'Rümeysa Deveci'],
 	jobTitle: contact.title,
 	email: contact.email,
 	url: Astro.site?.toString(),
@@ -27,6 +28,16 @@ const personSchema = {
 		addressLocality: 'Antalya',
 		addressCountry: 'TR',
 	},
+	workLocation: {
+		'@type': 'Place',
+		name: 'Antalya, Türkiye',
+		address: {
+			'@type': 'PostalAddress',
+			addressLocality: 'Antalya',
+			addressCountry: 'TR',
+		},
+	},
+	knowsAbout: ['Mimarlık', 'İç Mekan Tasarımı', 'Rezidans Projeleri', 'Yapısal Tasarım'],
 };
 ---
 
@@ -51,6 +62,7 @@ const personSchema = {
 		<meta property="og:image" content={ogImageURL} />
 		<meta property="og:url" content={canonicalURL} />
 		<meta property="og:locale" content="tr_TR" />
+		<meta property="og:site_name" content={contact.fullName} />
 
 		<!-- Twitter Card -->
 		<meta name="twitter:card" content="summary_large_image" />
